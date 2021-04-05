@@ -21,7 +21,11 @@ client.on("ready", () => {
 
 client.on("message", (msg) => {
   if (msg.author.bot) return;
-  msg.channel.send("idk");
+
+  console.log(msg.mentions);
+  msg.mentions.users.each((user) => {
+    console.log(user.id);
+  });
   if (msg.content === "!wins" || msg.content === "!Wins") {
     msg.reply("Pong!");
   } else {
