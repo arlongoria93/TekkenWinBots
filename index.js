@@ -11,7 +11,7 @@ const clientdb = new Client({
 });
 clientdb.connect();
 clientdb.query("SELECT * from person", (err, res) => {
-  console.log(err ? err.stack : res.rows[0].message); // Hello World!
+  console.log(err ? err.stack : res.rows[0]); // Hello World!
   clientdb.end();
 });
 
@@ -20,8 +20,12 @@ client.on("ready", () => {
 });
 
 client.on("message", (msg) => {
-  if (msg.content === "commands") {
+  if (msg.author.bot) return;
+  msg.channel.send("idk");
+  if (msg.content === "!wins" || msg.content === "!Wins") {
     msg.reply("Pong!");
+  } else {
+    msg.channel.send("Please type either !wins or !Wins");
   }
 });
 
