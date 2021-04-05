@@ -1,0 +1,15 @@
+{
+  "name": "tekkenwinbot",
+  "version": "1.0.0",
+  "description": "counts wins in tekken7",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^12.5.3",
+    "pg": "^8.5.1"
+  }
+}
