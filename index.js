@@ -29,9 +29,13 @@ const printTotalWins = (mention, msg) => {
     const text =
       "SELECT * FROM records WHERE (player1_id=$1 OR player1_id=$2) AND (player2_id=$2 OR player2_id=$1)";
 
-    const values = [ids[0]];
+    const values = [ids[0], ids[1]];
+
     clientdb.query(text, values, (err, res) => {
       // console.log(res.rows[0].player1_wins, res.rows[0].player2_wins);
+
+      if (res === undefined || res.rows.length === 0)
+        return msg.channel.send(`<@${ids[0]}> OR <@${ids[1]}> Has no data`);
       msg.channel.send(
         `<@${res.rows[0].player1_id}> W: ${res.rows[0].player1_wins} <@${res.rows[0].player2_id}> W: ${res.rows[0].player2_wins}`
       );
@@ -44,6 +48,8 @@ const printTotalWins = (mention, msg) => {
     clientdb.query(text, values, (err, res) => {
       // console.log(res.rows[0].player1_wins, res.rows[0].player2_wins);
       let totalWins = 0;
+      if (res === undefined || res.rows.length === 0)
+        return msg.channel.send(`<@${ids[0]}>` + "Has no data");
       res.rows.forEach((row) => {
         if (row.player1_id == ids[0]) {
           totalWins += row.player1_wins;
