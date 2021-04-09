@@ -22,9 +22,11 @@ client.on("ready", () => {
 // add(5,w)
 const printTotalWins = (mention, msg) => {
   let ids = [];
+
   mention.users.each((user) => {
     ids.push(user.id);
   });
+
   if (ids.length === 2) {
     const text =
       "SELECT * FROM records WHERE (player1_id=$1 OR player1_id=$2) AND (player2_id=$2 OR player2_id=$1)";
@@ -32,8 +34,6 @@ const printTotalWins = (mention, msg) => {
     const values = [ids[0], ids[1]];
 
     clientdb.query(text, values, (err, res) => {
-      // console.log(res.rows[0].player1_wins, res.rows[0].player2_wins);
-
       if (res === undefined || res.rows.length === 0)
         return msg.channel.send(`<@${ids[0]}> OR <@${ids[1]}> Has no data`);
       msg.channel.send(
@@ -41,12 +41,10 @@ const printTotalWins = (mention, msg) => {
       );
       if (err) console.log(err);
     });
-  }
-  if (ids.length === 1) {
+  } else if (ids.length === 1) {
     const text = "SELECT * FROM records WHERE (player1_id=$1 OR player2_id=$1)";
     const values = [ids[0]];
     clientdb.query(text, values, (err, res) => {
-      // console.log(res.rows[0].player1_wins, res.rows[0].player2_wins);
       let totalWins = 0;
       if (res === undefined || res.rows.length === 0)
         return msg.channel.send(`<@${ids[0]}>` + "Has no data");
@@ -63,12 +61,13 @@ const printTotalWins = (mention, msg) => {
     });
   }
 };
-let player1Wins = 100;
+
 client.on("message", (msg) => {
   if (!msg.content.startsWith("!") || msg.author.bot) return;
 
   let message = msg.content;
   const args = message.slice(1).trim().split(" ");
+  console.log(args);
   const commandName = args.shift().toLowerCase();
 
   if (commandName === "wins") {
