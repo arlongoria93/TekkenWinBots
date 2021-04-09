@@ -22,7 +22,15 @@ const addToWins = (msg) => {
   if (msg.mentions) {
     let user = msg.mentions.users.first();
     let userId = user.id;
-    let text = `UPDATE totals SET total = total + 1 WHERE name = 'bill'`;
+
+    //UPDATE Items set counter = counter + 1 WHERE name = 'Tony';
+    let text = `UPDATE records SET player1_wins = player1_wins + 1 WHERE player1_id = $1`;
+    let text2 = `IF EXISTS (SELECT FROM records WHERE player1_id=$1) THEN UPDATE records SET player1_wins = player1_wins + 1 WHERE player1_id = $1 END IF`;
+    let value = [userId];
+
+    clientdb.query(text2, value, (err, res) => {
+      if (err) console.log(err);
+    });
   } else {
     console.log("not working yet");
   }
