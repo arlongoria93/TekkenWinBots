@@ -14,12 +14,26 @@ clientdb.connect();
 client.on("ready", () => {
   console.log(`Hello World!`);
 });
+//Add To Wins Function
+const addToWins = (msg) => {
+  //-addW against @(user) = single wins
+  // -addW (num) @(user)= multiple wins
+
+  if (msg.mentions) {
+    let user = msg.mentions.users.first();
+    let userId = user.id;
+    let text = `UPDATE totals SET total = total + 1 WHERE name = 'bill'`;
+  } else {
+    console.log("not working yet");
+  }
+};
 
 //wins
 // wins @player
 // add w @player
 // add 5 w @player
 // add(5,w)
+
 const printTotalWins = (mention, msg) => {
   let ids = [];
 
@@ -74,7 +88,10 @@ client.on("message", (msg) => {
     if (msg.mentions.length > 1) return "err";
     //mention === msg.mentions
     printTotalWins(msg.mentions, msg);
-  } else if (commandName === "add") {
+  }
+
+  if (commandName === "addw") {
+    addToWins(msg);
   }
 
   if (msg.content === "test") {
