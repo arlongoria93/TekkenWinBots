@@ -23,13 +23,14 @@ const addToWins = (msg) => {
     let user = msg.mentions.users.first();
     let userId = user.id;
 
-    //UPDATE Items set counter = counter + 1 WHERE name = 'Tony';
-    let text = `UPDATE records SET player1_wins = player1_wins + 1 WHERE player1_id = $1`;
-    let text2 = `IF EXISTS (SELECT FROM records WHERE player1_id=$1) THEN UPDATE records SET player1_wins = player1_wins + 1 WHERE player1_id = $1 END IF`;
-    let value = [userId];
+    // let updateTest = `UPDATE records SET player1_wins = player1_wins+1 WHERE player1_id=$1 OR player2_id=$1`;
+    let revisedCASE = `SELECT player1_id FROM records WHERE EXISTS(SELECT 1 FROM records WHERE player1_id=$1)`;
+    let value = [msg.author.id];
 
-    clientdb.query(text2, value, (err, res) => {
+    clientdb.query(revisedCASE, value, (err, res) => {
       if (err) console.log(err);
+      console.log(msg.author.id);
+      console.log(res.rows);
     });
   } else {
     console.log("not working yet");
@@ -89,7 +90,7 @@ client.on("message", (msg) => {
 
   let message = msg.content;
   const args = message.slice(1).trim().split(" ");
-  console.log(args);
+
   const commandName = args.shift().toLowerCase();
 
   if (commandName === "wins") {
