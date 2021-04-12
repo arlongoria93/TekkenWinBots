@@ -21,16 +21,35 @@ const addToWins = (msg) => {
 
   if (msg.mentions) {
     let user = msg.mentions.users.first();
-    let userId = user.id;
-
-    // let updateTest = `UPDATE records SET player1_wins = player1_wins+1 WHERE player1_id=$1 OR player2_id=$1`;
+    if (msg.author.id === user.id)
+      return msg.channel.send("You cannot mention yourself!");
     let revisedCASE = `SELECT player1_id FROM records WHERE EXISTS(SELECT 1 FROM records WHERE player1_id=$1)`;
+    let case2 = `SELECT player2_id FROM records WHERE EXISTS(SELECT 1 FROM records WHERE player2_id=$1)`;
+
     let value = [msg.author.id];
 
     clientdb.query(revisedCASE, value, (err, res) => {
       if (err) console.log(err);
-      console.log(msg.author.id);
-      console.log(res.rows);
+      //NEED TO CHECK FOR MENTION PLAYER
+
+      if (res && res.rows.length > 0) {
+        let text = `UPDATE records SET player1_wins = player1_wins+1 WHERE player1_id=$1 OR player2_id=$1`;
+        let value = [msg.author.id];
+        clientdb.query(text, value, (err, res) => {
+          if (err) console.log(err);
+        });
+      }
+    });
+    clientdb.query(case2, value, (err, res) => {
+      if (err) console.log(err);
+
+      if (res && res.rows.length > 0) {
+        let text = `UPDATE records SET player2_wins = player2_wins+1 WHERE player2_id=$1 OR player2_id=$1`;
+        let value = [msg.author.id];
+        clientdb.query(text, value, (err, res) => {
+          if (err) console.log(err);
+        });
+      }
     });
   } else {
     console.log("not working yet");
