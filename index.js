@@ -14,13 +14,31 @@ clientdb.connect();
 client.on("ready", () => {
   console.log(`Hello World!`);
 });
+
+//Check Wins Function
+const checkWins = (msg) => {
+  let user = msg.mentions.users.first();
+  let authorId = msg.author.id;
+  let text = `SELECT * FROM records WHERE ((player1_id=$1 AND player2_id=$2) OR (player1_id=$2 AND player2_id=$1))`;
+  let values = [authorId, user.id];
+  clientdb.query(text, values, (err, res) => {
+    if (err) console.log(err);
+    if (res && res.rows.length > 0) {
+      console.log(res.rows);
+      msg.channel.send(
+        `<@${res.rows[0].player1_id}> has ${res.rows[0].player1_wins} wins against <@${res.rows[0].player2_id}>`
+      );
+    } else {
+      msg.channel.send("No data for these players");
+    }
+  });
+};
+
 //Add To Wins Function
 const addToWins = (msg) => {
-  //-addW against @(user) = single wins
-  // -addW (num) @(user)= multiple wins
-
   if (msg.mentions) {
     let user = msg.mentions.users.first();
+
     if (msg.author.id === user.id)
       return msg.channel.send("You cannot mention yourself!");
     let revisedCASE = `SELECT player1_id FROM records WHERE EXISTS(SELECT 1 FROM records WHERE player1_id=$1)`;
@@ -32,20 +50,45 @@ const addToWins = (msg) => {
       if (err) console.log(err);
       //NEED TO CHECK FOR MENTION PLAYER
 
-      if (res && res.rows.length > 0) {
-        let text = `UPDATE records SET player1_wins = player1_wins+1 WHERE player1_id=$1 OR player2_id=$1`;
-        let value = [msg.author.id];
+      if (res && res.rows.length > 0 && res.rows[0].length === 4) {
+        let text = `UPDATE records SET player1_wins = player1_wins+1 WHERE (player1_id=$1 AND player2_id=$2) OR  (player1_id=$2 AND player2_id=$1)`;
+        let value = [msg.author.id, user.id];
         clientdb.query(text, value, (err, res) => {
           if (err) console.log(err);
         });
+        return;
       }
     });
     clientdb.query(case2, value, (err, res) => {
       if (err) console.log(err);
 
       if (res && res.rows.length > 0) {
-        let text = `UPDATE records SET player2_wins = player2_wins+1 WHERE player2_id=$1 OR player2_id=$1`;
-        let value = [msg.author.id];
+        let text = `UPDATE records SET player2_wins = player2_wins+1 WHERE (player1_id=$1 AND player2_id=$2) OR  (player1_id=$2 AND player2_id=$1)`;
+        let value = [msg.author.id, user.id];
+        clientdb.query(text, value, (err, res) => {
+          if (err) console.log(err);
+        });
+      }
+    });
+    let txt = `SELECT * FROM records WHERE EXISTS(SELECT * FROM records WHERE player1_id=$1 AND player2_id=$2)`;
+    let values = [msg.author.id, user.id];
+    clientdb.query(txt, values, (err, res) => {
+      console.log(res);
+      if (err) console.log(err);
+      if (res.rows.length <= 0) {
+        console.log("im here");
+        let textUser = `INSERT INTO users(id) VALUES ($1)`;
+        let valuess = [msg.author.id];
+        clientdb.query(textUser, valuess, (err, res) => {
+          if (err) console.log(err);
+        });
+        textUser = `INSERT INTO users(id) VALUES ($1)`;
+        values = [user.id];
+        clientdb.query(textUser, values, (err, res) => {
+          if (err) console.log(err);
+        });
+        let text = `INSERT INTO records(player1_id,player2_id,player1_wins,player2_wins) VALUES ($1,$2,$3,$4)`;
+        let value = [msg.author.id, user.id, 0, 0];
         clientdb.query(text, value, (err, res) => {
           if (err) console.log(err);
         });
@@ -63,6 +106,10 @@ const addToWins = (msg) => {
 // add(5,w)
 
 const printTotalWins = (mention, msg) => {
+  if (!msg.mention) {
+    msg.channel.send("Must mention someone to check total wins");
+    return;
+  }
   let ids = [];
 
   mention.users.each((user) => {
@@ -115,11 +162,16 @@ client.on("message", (msg) => {
   if (commandName === "wins") {
     if (msg.mentions.length > 1) return "err";
     //mention === msg.mentions
+
     printTotalWins(msg.mentions, msg);
   }
 
   if (commandName === "addw") {
     addToWins(msg);
+  }
+  //Check Win Command
+  if (commandName === "cwins") {
+    checkWins(msg);
   }
 
   if (msg.content === "test") {
